@@ -451,6 +451,10 @@ static NSOperationQueue *_sharedNetworkQueue;
         if(expiryTimeInSeconds <= 0 || forceReload || operationFinished)
           [_sharedNetworkQueue addOperation:operation];
         // else don't do anything
+		else {
+		 // We could call a block here. It's sometimes useful to know
+		 // when we won't be hitting the server for an updated file.
+		}
       });
       
     } else {

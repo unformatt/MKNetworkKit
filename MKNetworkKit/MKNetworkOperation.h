@@ -78,6 +78,11 @@ typedef enum {
   MKNKPostDataEncodingType _postDataEncoding;
 }
 
+/*
+ *  @abstract date in which the response expires based on cache headers
+ *  @property expiresOnDate
+ */
+@property (nonatomic,retain) NSDate *expiresOnDate;
 /*!
  *  @abstract Request URL Property
  *  @property url

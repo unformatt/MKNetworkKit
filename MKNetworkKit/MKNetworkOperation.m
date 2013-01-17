@@ -101,6 +101,8 @@ OSStatus extractIdentityAndTrust(CFDataRef inPKCS12Data,
 
 @implementation MKNetworkOperation
 
+@synthesize expiresOnDate;
+
 @dynamic freezable;
 
 // A RESTful service should always return the same response for a given URL and it's parameters.
@@ -1107,7 +1109,8 @@ OSStatus extractIdentityAndTrust(CFDataRef inPKCS12Data,        // 5
   for(NSOutputStream *stream in self.downloadStreams)
     [stream open];
   
-  NSDictionary *httpHeaders = [self.response allHeaderFields];
+  // Get response headers from selector that can be overriden for subclass flexibility
+  NSDictionary *httpHeaders = [self responseHeaders];
   
   // if you attach a stream to the operation, MKNetworkKit will not cache the response.
   // Streams are usually "big data chunks" that doesn't need caching anyways.
@@ -1123,8 +1126,7 @@ OSStatus extractIdentityAndTrust(CFDataRef inPKCS12Data,        // 5
     NSString *contentType = httpHeaders[@"Content-Type"];
     // if contentType is image,
     
-    NSDate *expiresOnDate = nil;
-    
+	self.expiresOnDate = nil;
     if([contentType rangeOfString:@"image"].location != NSNotFound) {
       
       // For images let's assume a expiry date of 7 days if there is no eTag or Last Modified.
@@ -1136,7 +1138,7 @@ OSStatus extractIdentityAndTrust(CFDataRef inPKCS12Data,        // 5
     
     NSString *cacheControl = httpHeaders[@"Cache-Control"]; // max-age, must-revalidate, no-cache
     NSArray *cacheControlEntities = [cacheControl componentsSeparatedByString:@","];
-    
+	
     for(NSString *substring in cacheControlEntities) {
       
       if([substring rangeOfString:@"max-age"].location != NSNotFound) {
@@ -1285,6 +1287,9 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
 #pragma mark -
 #pragma mark Our methods to get data
 
+-(NSDictionary*) responseHeaders {
+	return [self.response allHeaderFields];
+}
 -(NSData*) responseData {
   
   if([self isFinished])
